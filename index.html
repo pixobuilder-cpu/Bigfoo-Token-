@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bigfoot Token - Safe App</title>
-    <!-- Safe Apps SDK - version stable -->
     <script src="https://unpkg.com/@safe-global/safe-apps-sdk@8.1.0/dist/safe-apps-sdk.min.js"></script>
 </head>
 <body>
@@ -23,11 +22,10 @@
         (function() {
             console.log("SDK chargé ?", typeof window.SafeAppsSDK);
             
-            // Attendre que le SDK soit disponible
             function initSafeSDK() {
                 try {
                     if (!window.SafeAppsSDK) {
-                        throw new Error("Le SDK Safe n'est pas chargé. Assurez-vous d'ouvrir cette page depuis l'application Safe.");
+                        throw new Error("Le SDK Safe n'est pas chargé. Ouvrez cette page depuis l'application Safe.");
                     }
                     
                     const sdk = new window.SafeAppsSDK.default();
@@ -53,11 +51,9 @@
                 }
             }
             
-            // Si le SDK est déjà chargé
             if (window.SafeAppsSDK) {
                 initSafeSDK();
             } else {
-                // Sinon attendre le chargement
                 window.addEventListener('load', function() {
                     setTimeout(initSafeSDK, 100);
                 });
@@ -66,4 +62,3 @@
     </script>
 </body>
 </html>
-
