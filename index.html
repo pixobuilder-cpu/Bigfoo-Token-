@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bigfoot Token - Safe App</title>
+    <!-- Version stable du SDK Safe -->
     <script src="https://unpkg.com/@safe-global/safe-apps-sdk@8.1.0/dist/safe-apps-sdk.min.js"></script>
 </head>
 <body>
@@ -19,46 +20,46 @@
     </div>
 
     <script>
-        (function() {
-            console.log("SDK chargé ?", typeof window.SafeAppsSDK);
+        // Attendre que le DOM soit chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM chargé, tentative d'initialisation Safe SDK");
             
-            function initSafeSDK() {
-                try {
-                    if (!window.SafeAppsSDK) {
-                        throw new Error("Le SDK Safe n'est pas chargé. Ouvrez cette page depuis l'application Safe.");
-                    }
-                    
-                    const sdk = new window.SafeAppsSDK.default();
-                    console.log("SDK initialisé", sdk);
-                    
-                    sdk.safe.getInfo().then(safeInfo => {
+            // Vérifier si le SDK est disponible
+            if (typeof window.SafeAppsSDK === 'undefined') {
+                console.error("SafeAppsSDK non trouvé - vérifiez l'URL du script");
+                document.getElementById('safe-status').innerHTML = '❌ SDK Safe non chargé';
+                document.getElementById('error-info').innerHTML = 'Erreur: Le SDK Safe n\'a pas pu être chargé. Vérifiez votre connexion internet.';
+                return;
+            }
+            
+            try {
+                // Initialiser le SDK
+                const sdk = new window.SafeAppsSDK.default();
+                console.log("SDK initialisé avec succès");
+                
+                // Récupérer les informations du Safe
+                sdk.safe.getInfo()
+                    .then(safeInfo => {
+                        console.log("Info Safe reçue:", safeInfo);
                         document.getElementById('safe-status').innerHTML = '✅ Connecté au Safe';
                         document.getElementById('safe-info').innerHTML = `
-                            <strong>Address:</strong> ${safeInfo.safeAddress}<br>
-                            <strong>Network:</strong> ${safeInfo.chainId || 'Polygon'}<br>
-                            <strong>Threshold:</strong> ${safeInfo.threshold}
+                            📍 <strong>Address:</strong> ${safeInfo.safeAddress}<br>
+                            🌐 <strong>Network:</strong> ${safeInfo.chainId === '137' ? 'Polygon' : safeInfo.chainId}<br>
+                            🔐 <strong>Threshold:</strong> ${safeInfo.threshold}/${safeInfo.owners.length} owners
                         `;
-                    }).catch(err => {
+                    })
+                    .catch(err => {
+                        console.error("Erreur getInfo:", err);
                         document.getElementById('safe-status').innerHTML = '⚠️ Erreur de connexion';
                         document.getElementById('error-info').innerHTML = `Erreur: ${err.message}`;
-                        console.error("Erreur Safe:", err);
                     });
                     
-                } catch (err) {
-                    document.getElementById('safe-status').innerHTML = '❌ Erreur d\'initialisation';
-                    document.getElementById('error-info').innerHTML = `Erreur: ${err.message}`;
-                    console.error("Erreur init:", err);
-                }
+            } catch (err) {
+                console.error("Erreur d'initialisation:", err);
+                document.getElementById('safe-status').innerHTML = '❌ Erreur d\'initialisation';
+                document.getElementById('error-info').innerHTML = `Erreur: ${err.message}`;
             }
-            
-            if (window.SafeAppsSDK) {
-                initSafeSDK();
-            } else {
-                window.addEventListener('load', function() {
-                    setTimeout(initSafeSDK, 100);
-                });
-            }
-        })();
+        });
     </script>
 </body>
 </html>
