@@ -2,24 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bigfoot DAO</title>
-    <!-- LIEN CORRIGÉ CI-DESSOUS -->
+    <!-- CE LIEN DOIT ÊTRE COMPLET COMME CECI -->
     <script src="https://unpkg.com"></script>
 </head>
 <body>
-    <h1>Bigfoot Token DAO - Polygon</h1>
-    <p>Connecté au Safe de la communauté BFT.</p>
-    
+    <div style="text-align: center; font-family: sans-serif; padding: 20px;">
+        <h1>BFT Bigfoot Token DAO</h1>
+        <p>Interface de Gouvernance sur Polygon</p>
+        <hr>
+        <p id="safe-status">Connexion au Safe en cours...</p>
+    </div>
+
     <script>
         const opts = {
             allowedDomains: [/gnosis-safe.io$/, /app.safe.global$/],
         };
-        // Utilisation du SDK
+        // Initialisation du SDK pour que le bouton Safe devienne BLEU
         const sdk = new window.SafeAppsSDK.default(opts);
         
         sdk.safe.getInfo().then((info) => {
-            console.log("Connecté au Safe:", info.safeAddress);
+            document.getElementById('safe-status').innerText = "Connecté au Safe : " + info.safeAddress;
+        }).catch(err => {
+            document.getElementById('safe-status').innerText = "Veuillez ouvrir cette page DEPUIS l'interface Safe.";
         });
     </script>
 </body>
 </html>
+
