@@ -1,9 +1,9 @@
 {
   "name": "Bigfoot Token",
-  "description": "Community-driven DeFi ecosystem on Polygon for Bigfoot Token (BFT).",
-  "iconPath": "logo.svg",
+  "description": "Interface de gouvernance pour Bigfoot Token (BFT) sur Polygon",
+  "iconPath": "https://raw.githubusercontent.com/pixobuilder-cpu/Bigfoo-Token-/main/assets/logo.png",
   "providedBy": {
     "name": "Bigfoot Team",
-    "url": "https://pixobuilder-cpu.github.io/Bigfoo-Token-/"
+    "url": "https://github.com/pixobuilder-cpu/Bigfoo-Token-"
   }
 }
