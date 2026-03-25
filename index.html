@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bigfoot Token - Safe App</title>
-    <!-- ✅ URL CORRECTE du SDK Safe Apps (version stable) -->
-    <script src="https://unpkg.com/@safe-global/safe-apps-sdk@7.11.0/dist/index.js"></script>
+    <!-- SDK Safe via le CDN officiel Safe -->
+    <script src="https://apps-assets.gnosis-safe.io/safe-apps-sdk/v0.0.1/safe-apps-sdk.min.js"></script>
 </head>
 <body>
     <div style="text-align: center; font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
@@ -23,62 +23,65 @@
         (function() {
             console.log("🚀 Chargement de l'application Bigfoot Token");
             
-            // Éléments DOM
             const statusEl = document.getElementById('safe-status');
             const infoEl = document.getElementById('safe-info');
             const errorEl = document.getElementById('error-info');
             
-            // Fonction pour afficher les erreurs
-            function showError(message, details = '') {
-                statusEl.innerHTML = '❌ Erreur de connexion';
-                errorEl.innerHTML = `${message}${details ? '<br>' + details : ''}`;
-                console.error(message, details);
-            }
-            
-            // Attendre que le SDK soit disponible
             function initSafeSDK() {
-                // Vérifier si le SDK est chargé
-                if (typeof window.SafeAppsSDK === 'undefined') {
-                    console.warn("⏳ SDK pas encore chargé, tentative dans 500ms...");
-                    setTimeout(initSafeSDK, 500);
+                // Vérifier les différentes façons dont le SDK peut être exposé
+                const SafeSDK = window.SafeAppsSDK || window.safeAppsSdk || window.Safe;
+                
+                if (!SafeSDK) {
+                    console.error("SDK non trouvé. Objets disponibles:", Object.keys(window));
+                    statusEl.innerHTML = '❌ SDK Safe non disponible';
+                    errorEl.innerHTML = 'Le SDK Safe n\'a pas pu être chargé. Vérifiez votre connexion et rechargez la page.';
                     return;
                 }
                 
-                console.log("✅ SDK SafeAppsSDK trouvé", window.SafeAppsSDK);
+                console.log("✅ SDK trouvé", SafeSDK);
                 
                 try {
-                    // Initialiser le SDK
-                    const sdk = new window.SafeAppsSDK.default();
+                    // Initialisation selon la version du SDK
+                    let sdk;
+                    if (typeof SafeSDK.default === 'function') {
+                        sdk = new SafeSDK.default();
+                    } else if (typeof SafeSDK === 'function') {
+                        sdk = new SafeSDK();
+                    } else {
+                        throw new Error("Format du SDK non reconnu");
+                    }
+                    
                     console.log("🔧 SDK initialisé");
                     
-                    // Récupérer les infos du Safe
                     sdk.safe.getInfo()
                         .then(safeInfo => {
-                            console.log("📦 Infos Safe reçues:", safeInfo);
+                            console.log("📦 Infos Safe:", safeInfo);
                             statusEl.innerHTML = '✅ Connecté au Safe';
                             infoEl.innerHTML = `
                                 📍 <strong>Address:</strong> ${safeInfo.safeAddress}<br>
-                                🌐 <strong>Network:</strong> ${safeInfo.chainId === '137' ? 'Polygon (Mainnet)' : safeInfo.chainId}<br>
+                                🌐 <strong>Network:</strong> ${safeInfo.chainId === '137' ? 'Polygon' : safeInfo.chainId}<br>
                                 👥 <strong>Owners:</strong> ${safeInfo.owners.length}<br>
                                 🔐 <strong>Threshold:</strong> ${safeInfo.threshold}
                             `;
                         })
                         .catch(err => {
-                            console.error("❌ Erreur getInfo:", err);
-                            showError("Impossible de récupérer les informations du Safe", err.message);
+                            console.error("Erreur getInfo:", err);
+                            statusEl.innerHTML = '⚠️ Erreur de connexion';
+                            errorEl.innerHTML = `Erreur: ${err.message}`;
                         });
                         
                 } catch (err) {
-                    console.error("❌ Erreur d'initialisation:", err);
-                    showError("Erreur lors de l'initialisation du SDK", err.message);
+                    console.error("Erreur init:", err);
+                    statusEl.innerHTML = '❌ Erreur d\'initialisation';
+                    errorEl.innerHTML = `Erreur: ${err.message}`;
                 }
             }
             
-            // Lancer l'initialisation quand la page est prête
+            // Attendre que le SDK soit chargé
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initSafeSDK);
+                document.addEventListener('DOMContentLoaded', () => setTimeout(initSafeSDK, 500));
             } else {
-                initSafeSDK();
+                setTimeout(initSafeSDK, 500);
             }
         })();
     </script>
