@@ -1,0 +1,9 @@
+{
+  "name": "Bigfoot DAO",
+  "description": "Community-driven DeFi ecosystem on Polygon for Bigfoot Token (BFT).",
+  "iconPath": "logo.svg",
+  "providedBy": {
+    "name": "Bigfoot Team",
+    "url": "https://pixobuilder-cpu.github.io/Bigfoo-Token-/"
+  }
+}
