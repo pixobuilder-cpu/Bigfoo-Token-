@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bigfoot DAO</title>
+    <!-- LIEN CORRIGÉ CI-DESSOUS -->
+    <script src="https://unpkg.com"></script>
+</head>
+<body>
+    <h1>Bigfoot Token DAO - Polygon</h1>
+    <p>Connecté au Safe de la communauté BFT.</p>
+    
+    <script>
+        const opts = {
+            allowedDomains: [/gnosis-safe.io$/, /app.safe.global$/],
+        };
+        // Utilisation du SDK
+        const sdk = new window.SafeAppsSDK.default(opts);
+        
+        sdk.safe.getInfo().then((info) => {
+            console.log("Connecté au Safe:", info.safeAddress);
+        });
+    </script>
+</body>
+</html>
