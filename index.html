@@ -3,30 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bigfoot Token</title>
-    <!-- CE LIEN DOIT ÊTRE COMPLET COMME CECI -->
-    <script src="https://unpkg.com"></script>
+    <title>Bigfoot Token - Safe App</title>
+    <!-- Safe Apps SDK - version stable -->
+    <script src="https://unpkg.com/@safe-global/safe-apps-sdk@8.1.0/dist/safe-apps-sdk.min.js"></script>
 </head>
 <body>
-    <div style="text-align: center; font-family: sans-serif; padding: 20px;">
-        <h1>BFT Bigfoot Token </h1>
+    <div style="text-align: center; font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+        <h1>🐾 Bigfoot Token (BFT)</h1>
         <p>Interface de Gouvernance sur Polygon</p>
         <hr>
-        <p id="safe-status">Connexion au Safe en cours...</p>
+        <div id="safe-status" style="padding: 20px;">
+            ⏳ Connexion au Safe en cours...
+        </div>
+        <div id="safe-info" style="font-size: 12px; color: #666;"></div>
+        <div id="error-info" style="color: red; font-size: 12px;"></div>
     </div>
 
     <script>
-        const opts = {
-            allowedDomains: [/gnosis-safe.io$/, /app.safe.global$/],
-        };
-        // Initialisation du SDK pour que le bouton Safe devienne BLEU
-        const sdk = new window.SafeAppsSDK.default(opts);
-        
-        sdk.safe.getInfo().then((info) => {
-            document.getElementById('safe-status').innerText = "Connecté au Safe : " + info.safeAddress;
-        }).catch(err => {
-            document.getElementById('safe-status').innerText = "Veuillez ouvrir cette page DEPUIS l'interface Safe.";
-        });
+        (function() {
+            console.log("SDK chargé ?", typeof window.SafeAppsSDK);
+            
+            // Attendre que le SDK soit disponible
+            function initSafeSDK() {
+                try {
+                    if (!window.SafeAppsSDK) {
+                        throw new Error("Le SDK Safe n'est pas chargé. Assurez-vous d'ouvrir cette page depuis l'application Safe.");
+                    }
+                    
+                    const sdk = new window.SafeAppsSDK.default();
+                    console.log("SDK initialisé", sdk);
+                    
+                    sdk.safe.getInfo().then(safeInfo => {
+                        document.getElementById('safe-status').innerHTML = '✅ Connecté au Safe';
+                        document.getElementById('safe-info').innerHTML = `
+                            <strong>Address:</strong> ${safeInfo.safeAddress}<br>
+                            <strong>Network:</strong> ${safeInfo.chainId || 'Polygon'}<br>
+                            <strong>Threshold:</strong> ${safeInfo.threshold}
+                        `;
+                    }).catch(err => {
+                        document.getElementById('safe-status').innerHTML = '⚠️ Erreur de connexion';
+                        document.getElementById('error-info').innerHTML = `Erreur: ${err.message}`;
+                        console.error("Erreur Safe:", err);
+                    });
+                    
+                } catch (err) {
+                    document.getElementById('safe-status').innerHTML = '❌ Erreur d\'initialisation';
+                    document.getElementById('error-info').innerHTML = `Erreur: ${err.message}`;
+                    console.error("Erreur init:", err);
+                }
+            }
+            
+            // Si le SDK est déjà chargé
+            if (window.SafeAppsSDK) {
+                initSafeSDK();
+            } else {
+                // Sinon attendre le chargement
+                window.addEventListener('load', function() {
+                    setTimeout(initSafeSDK, 100);
+                });
+            }
+        })();
     </script>
 </body>
 </html>
