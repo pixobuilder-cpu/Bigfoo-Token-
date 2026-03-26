@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bigfoot Token - Safe App</title>
+    <!-- SDK Safe via le CDN officiel Safe -->
+    <script src="https://apps-assets.gnosis-safe.io/safe-apps-sdk/v0.0.1/safe-apps-sdk.min.js"></script>
+</head>
+<body>
+    <div style="text-align: center; font-family: system-ui, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+        <h1>🐾 Bigfoot Token (BFT)</h1>
+        <p>Interface de Gouvernance sur Polygon</p>
+        <hr>
+        <div id="safe-status" style="padding: 20px; font-weight: bold;">
+            ⏳ Connexion au Safe en cours...
+        </div>
+        <div id="safe-info" style="font-size: 12px; color: #666; margin-top: 10px;"></div>
+        <div id="error-info" style="color: #d32f2f; font-size: 12px; margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        (function() {
+            console.log("🚀 Chargement de l'application Bigfoot Token");
+            
+            const statusEl = document.getElementById('safe-status');
+            const infoEl = document.getElementById('safe-info');
+            const errorEl = document.getElementById('error-info');
+            
+            function initSafeSDK() {
+                // Vérifier les différentes façons dont le SDK peut être exposé
+                const SafeSDK = window.SafeAppsSDK || window.safeAppsSdk || window.Safe;
+                
+                if (!SafeSDK) {
+                    console.error("SDK non trouvé. Objets disponibles:", Object.keys(window));
+                    statusEl.innerHTML = '❌ SDK Safe non disponible';
+                    errorEl.innerHTML = 'Le SDK Safe n\'a pas pu être chargé. Vérifiez votre connexion et rechargez la page.';
+                    return;
+                }
+                
+                console.log("✅ SDK trouvé", SafeSDK);
+                
+                try {
+                    // Initialisation selon la version du SDK
+                    let sdk;
+                    if (typeof SafeSDK.default === 'function') {
+                        sdk = new SafeSDK.default();
+                    } else if (typeof SafeSDK === 'function') {
+                        sdk = new SafeSDK();
+                    } else {
+                        throw new Error("Format du SDK non reconnu");
+                    }
+                    
+                    console.log("🔧 SDK initialisé");
+                    
+                    sdk.safe.getInfo()
+                        .then(safeInfo => {
+                            console.log("📦 Infos Safe:", safeInfo);
+                            statusEl.innerHTML = '✅ Connecté au Safe';
+                            infoEl.innerHTML = `
+                                📍 <strong>Address:</strong> ${safeInfo.safeAddress}<br>
+                                🌐 <strong>Network:</strong> ${safeInfo.chainId === '137' ? 'Polygon' : safeInfo.chainId}<br>
+                                👥 <strong>Owners:</strong> ${safeInfo.owners.length}<br>
+                                🔐 <strong>Threshold:</strong> ${safeInfo.threshold}
+                            `;
+                        })
+                        .catch(err => {
+                            console.error("Erreur getInfo:", err);
+                            statusEl.innerHTML = '⚠️ Erreur de connexion';
+                            errorEl.innerHTML = `Erreur: ${err.message}`;
+                        });
+                        
+                } catch (err) {
+                    console.error("Erreur init:", err);
+                    statusEl.innerHTML = '❌ Erreur d\'initialisation';
+                    errorEl.innerHTML = `Erreur: ${err.message}`;
+                }
+            }
+            
+            // Attendre que le SDK soit chargé
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => setTimeout(initSafeSDK, 500));
+            } else {
+                setTimeout(initSafeSDK, 500);
+            }
+        })();
+    </script>
+</body>
+</html>
