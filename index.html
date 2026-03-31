@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bigfoot Token (BFT) | Project Sync & AI Oracle</title>
+    <link rel="stylesheet" href="style.css"> <!-- Assure-toi que ton fichier CSS est bien lié -->
+    <style>
+        :root {
+            --primary: #f39c12;
+            --secondary: #2c3e50;
+            --bg-dark: #0a0a0a;
+            --text-light: #ecf0f1;
+            --danger: #e74c3c;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: auto; padding: 0 20px; }
+        header { padding: 40px 0; text-align: center; border-bottom: 1px solid #222; }
+        
+        /* New Banner */
+        .announcement-bar {
+            background: linear-gradient(90deg, #1a1a1a, #2c3e50);
+            border-bottom: 2px solid var(--primary);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .hero { padding: 80px 0; text-align: center; }
+        .hero h1 { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
+
+        /* Sync Section */
+        .sync-section { background: #111; padding: 60px 0; border-radius: 15px; margin: 40px 0; border: 1px solid #222; }
+        .btn-wbft {
+            background: #444; color: #888; border: none; padding: 12px 30px; 
+            border-radius: 5px; cursor: not-allowed; font-weight: bold; margin-top: 20px;
+        }
+
+        /* Transparency Box */
+        .transparency-box {
+            padding: 30px; border: 1px dashed var(--danger); border-radius: 10px;
+            background: rgba(231, 76, 60, 0.05); margin-top: 50px; text-align: center;
+        }
+        .tx-link { color: var(--danger); text-decoration: none; font-weight: bold; }
+
+        /* Roadmap Grid */
+        .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px; }
+        .phase { background: #1a1a1a; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Announcement Bar -->
+    <div class="announcement-bar">
+        🚀 <strong>NEWS:</strong> Project Sync is active! Developing an AI-Driven Oracle for low-liquidity assets. 
+        <a href="#project-sync" style="color: #3498db; margin-left:10px;">Read More ↓</a>
+    </div>
+
+    <div class="container">
+        <!-- 2. Hero Section -->
+        <header>
+            <div class="hero">
+                <h1>Bigfoot Token (BFT)</h1>
+                <p>Community-Driven DeFi Ecosystem on Polygon (PoS)</p>
+                <div style="margin-top:30px;">
+                    <a href="#" class="btn-primary" style="background:var(--primary); color:black; padding:12px 25px; border-radius:5px; text-decoration:none; font-weight:bold;">Buy BFT</a>
+                    <a href="https://github.com" target="_blank" style="margin-left:15px; color:var(--text-light);">GitHub Repository</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 3. Staking Info -->
+        <section style="text-align: center; padding: 50px 0;">
+            <h2>Staking Ecosystem</h2>
+            <p>Lock your BFT for <strong>7 days</strong> and earn <strong>5% rewards</strong> automatically.</p>
+        </section>
+
+        <!-- 4. Project Sync & WBFT (The New Tech) -->
+        <section id="project-sync" class="sync-section">
+            <div class="container" style="text-align:center;">
+                <h2 style="color: var(--primary);">Introducing Project Sync</h2>
+                <p style="max-width: 750px; margin: auto;">
+                    Project Sync is a specialized infrastructure designed to solve <strong>price-fetching errors</strong> 
+                    for low-liquidity tokens. Our AI-driven Oracle provides precision data where standard aggregators fail.
+                </p>
+                
+                <div style="margin-top:40px; border-top: 1px solid #333; padding-top:30px;">
+                    <h3>Wrapped BFT (WBFT)</h3>
+                    <p>WBFT will be the native gas/payment currency for all Project Sync developer tools.</p>
+                    <button class="btn-wbft">Wrap BFT (Coming Soon)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Updated Roadmap -->
+        <section id="roadmap" style="padding: 50px 0;">
+            <h2 style="text-align:center;">Evolution Roadmap</h2>
+            <div class="roadmap">
+                <div class="phase">
+                    <h4>Phase 1: Foundation</h4>
+                    <p>Liquidity Injection & WBFT Smart Contract deployment on Polygon.</p>
+                </div>
+                <div class="phase">
+                    <h4>Phase 2: Development</h4>
+                    <p>Project Sync Gateway Alpha (Multi-asset support: BFT, POL, WETH).</p>
+                </div>
+                <div class="phase">
+                    <h4>Phase 3: AI Integration</h4>
+                    <p>Beta testing of our AI-Driven Oracle for low-cap token data.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Transparency & Security -->
+        <section class="transparency-box">
+            <h3>🛡️ Transparency & Resilience Report</h3>
+            <p>We believe in full on-chain accountability. Following a security incident involving development funds (ZRO), we have fortified our security protocols.</p>
+            <a href="https://polygonscan.com" target="_blank" class="tx-link">
+                View Incident Transaction on Polygonscan →
+            </a>
+        </section>
+
+        <!-- Footer -->
+        <footer style="text-align:center; padding: 60px 0; color: #555; font-size: 0.8rem;">
+            <p>&copy; 2024 Bigfoot Token (BFT). Built on Polygon.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
+
