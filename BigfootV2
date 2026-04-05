@@ -1,0 +1,137 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
+interface IBigfootRegistry {
+    function bftAddress() external view returns (address);
+    function wbftAddress() external view returns (address);
+    function isRegistered(address account) external view returns (bool);
+}
+
+contract BigfootMarketplaceV2 is Ownable, ReentrancyGuard {
+    IBigfootRegistry public registry;
+
+    // Fixed naming to avoid "Similar variable names" warning
+    address public constant WPOL_ADDR = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+    address public constant WETH_ADDR = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+    address public constant USDC_STABLE = 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359;
+    address public constant USDT_STABLE = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
+    address public constant NATIVE_POL = address(0);
+
+    uint256 public feeBps = 250; 
+    address public treasury;
+
+    enum OrderStatus { ACTIVE, SOLD, DELIVERED, CLOSED }
+
+    struct Listing {
+        address seller;
+        address nftContract;
+        uint256 tokenId;
+        uint256 price;
+        address paymentToken;
+        OrderStatus status;
+        address buyer;
+    }
+
+    mapping(uint256 => Listing) public listings;
+    uint256 public nextId;
+
+    event NFTListed(uint256 indexed id, address indexed seller, uint256 price);
+    event NFTPaid(uint256 indexed id, address indexed buyer);
+    event DeliveryConfirmed(uint256 indexed id);
+
+    constructor(address _reg, address _tre) Ownable(msg.sender) {
+        require(_reg != address(0), "Reg invalid");
+        require(_tre != address(0), "Tre invalid");
+        registry = IBigfootRegistry(_reg);
+        treasury = _tre;
+    }
+
+    function listNFT(address _nft, uint256 _tkId, uint256 _pr, address _tkn) external {
+        require(registry.isRegistered(msg.sender), "Not registered");
+        
+        bool allowed = (_tkn == registry.bftAddress() || _tkn == registry.wbftAddress() || 
+                        _tkn == WETH_ADDR || _tkn == WPOL_ADDR || 
+                        _tkn == USDC_STABLE || _tkn == USDT_STABLE || _tkn == NATIVE_POL);
+        require(allowed, "Currency not supported");
+
+        IERC721 nft = IERC721(_nft);
+        require(nft.ownerOf(_tkId) == msg.sender, "Not owner");
+        require(nft.isApprovedForAll(msg.sender, address(this)), "Approval missing");
+
+        listings[nextId] = Listing({
+            seller: msg.sender,
+            nftContract: _nft,
+            tokenId: _tkId,
+            price: _pr,
+            paymentToken: _tkn,
+            status: OrderStatus.ACTIVE,
+            buyer: address(0)
+        });
+
+        emit NFTListed(nextId, msg.sender, _pr);
+        nextId++;
+    }
+
+    function buyNFT(uint256 _id) external payable nonReentrant {
+        Listing storage item = listings[_id];
+        require(item.status == OrderStatus.ACTIVE, "Not active");
+
+        item.status = OrderStatus.SOLD;
+        item.buyer = msg.sender;
+
+        if (item.paymentToken == NATIVE_POL) {
+            require(msg.value >= item.price, "Low POL balance");
+        } else {
+            IERC20(item.paymentToken).transferFrom(msg.sender, address(this), item.price);
+        }
+
+        IERC721(item.nftContract).safeTransferFrom(item.seller, msg.sender, item.tokenId);
+        emit NFTPaid(_id, msg.sender);
+    }
+
+    function confirmDelivery(uint256 _id) external nonReentrant {
+        Listing storage item = listings[_id];
+        require(msg.sender == item.buyer, "Buyer only");
+        require(item.status == OrderStatus.SOLD, "Not sold");
+
+        item.status = OrderStatus.DELIVERED;
+        _settleFunds(_id);
+        emit DeliveryConfirmed(_id);
+    }
+
+    function _settleFunds(uint256 _id) internal {
+        Listing memory item = listings[_id];
+        uint256 fee = (item.price * feeBps) / 10000;
+        uint256 net = item.price - fee;
+
+        if (item.paymentToken == NATIVE_POL) {
+            payable(treasury).transfer(fee);
+            payable(item.seller).transfer(net);
+        } else {
+            IERC20(item.paymentToken).transfer(treasury, fee);
+            IERC20(item.paymentToken).transfer(item.seller, net);
+        }
+    }
+
+    function resolveDispute(uint256 _id, bool refund) external onlyOwner {
+        Listing storage item = listings[_id];
+        require(item.status == OrderStatus.SOLD, "Status invalid");
+
+        item.status = OrderStatus.CLOSED;
+
+        if (refund) {
+            if (item.paymentToken == NATIVE_POL) {
+                payable(item.buyer).transfer(item.price);
+            } else {
+                IERC20(item.paymentToken).transfer(item.buyer, item.price);
+            }
+        } else {
+            _settleFunds(_id);
+        }
+    }
+}
