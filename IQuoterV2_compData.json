@@ -1,0 +1,127 @@
+{
+	"compilerInput": "{\"language\":\"Solidity\",\"sources\":{\"Contract/Oracle.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n// Interface officielle du QuoterV2 d'Uniswap V3 (Plus adapté aux appels de contrats et d'IA)\\ninterface IQuoterV2 {\\n    struct QuoteExactInputSingleParams {\\n        address tokenIn;\\n        address tokenOut;\\n        uint256 amountIn;\\n        uint24 fee;\\n        uint160 sqrtPriceLimitX96;\\n    }\\n\\n    function quoteExactInputSingle(QuoteExactInputSingleParams memory params)\\n        external\\n        view\\n        returns (\\n            uint256 amountOut,\\n            uint160 sqrtPriceX96After,\\n            uint32 initializedTicksCrossed,\\n            uint256 gasEstimate\\n        );\\n\\n    function quoteExactInput(bytes calldata path, uint256 amountIn)\\n        external\\n        view\\n        returns (\\n            uint256 amountOut,\\n            uint160[] memory sqrtPriceX96AfterList,\\n            uint32[] memory initializedTicksCrossedList,\\n            uint256 gasEstimate\\n        );\\n}\\n\\ncontract PriceLensUniswap {\\n    // Adresse du QuoterV2 sur Polygon\\n    address private constant UNISWAP_V3_QUOTERV2 = 0x61FCe191b3384e5F761c4096c868228b59e6416c; \\n\\n    // Vos adresses sur Polygon\\n    address private constant BFT = 0x140098cCcdad0D8e63f8EF213cB3939e4d82d557;\\n    address private constant USDC = 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359; // 6 décimales\\n    address private constant LINK = 0xb0897686c545045aFc77CF20eC7A532E3120E0F1; // 18 décimales\\n\\n    uint24 public poolFee = 3000; // 0.3%\\n\\n    // Structure propre pour envoyer toutes les données d'un coup à votre IA\\n    struct AIPriceReport {\\n        uint256 priceDirectUSDC;\\n        uint256 priceViaLINK;\\n        uint256 timestamp;\\n    }\\n\\n    // Changement en \\\"view\\\" : utilisable sans payer de gaz par l'IA\\n    function obtenirPrixViaPoolUSDC() public view returns (uint256) {\\n        uint256 montantEntree = 10**18; // 1 BFT\\n\\n        IQuoterV2.QuoteExactInputSingleParams memory params = IQuoterV2.QuoteExactInputSingleParams({\\n            tokenIn: BFT,\\n            tokenOut: USDC,\\n            amountIn: montantEntree,\\n            fee: poolFee,\\n            sqrtPriceLimitX96: 0\\n        });\\n\\n        try IQuoterV2(UNISWAP_V3_QUOTERV2).quoteExactInputSingle(params) returns (uint256 amountOut, uint160, uint32, uint256) {\\n            return amountOut; \\n        } catch {\\n            return 0; // Retourne 0 si la pool n'a pas assez de liquidité\\n        }\\n    }\\n\\n    function obtenirPrixBFTversLINKversUSDC() public view returns (uint256) {\\n        uint256 montantEntree = 10**18; \\n        bytes memory chemin = abi.encodePacked(BFT, poolFee, LINK, uint24(3000), USDC);\\n\\n        try IQuoterV2(UNISWAP_V3_QUOTERV2).quoteExactInput(chemin, montantEntree) returns (uint256 amountOut, uint160[] memory, uint32[] memory, uint256) {\\n            return amountOut;\\n        } catch {\\n            return 0;\\n        }\\n    }\\n\\n    /**\\n     * @notice La fonction \\\"Lens\\\" ultime pour votre IA\\n     * @dev Récupère toutes les routes de prix en un seul appel RPC\\n     */\\n    function getFullPriceReportForAI() external view returns (AIPriceReport memory) {\\n        return AIPriceReport({\\n            priceDirectUSDC: obtenirPrixViaPoolUSDC(),\\n            priceViaLINK: obtenirPrixBFTversLINKversUSDC(),\\n            timestamp: block.timestamp\\n        });\\n    }\\n}\\n\"}},\"settings\":{\"optimizer\":{\"enabled\":true,\"runs\":200},\"outputSelection\":{\"*\":{\"\":[\"ast\"],\"*\":[\"abi\",\"metadata\",\"devdoc\",\"userdoc\",\"storageLayout\",\"evm.legacyAssembly\",\"evm.bytecode\",\"evm.deployedBytecode\",\"evm.methodIdentifiers\",\"evm.gasEstimates\",\"evm.assembly\"]}},\"remappings\":[],\"evmVersion\":\"shanghai\"}}",
+	"name": "IQuoterV2",
+	"metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"path\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"amountIn\",\"type\":\"uint256\"}],\"name\":\"quoteExactInput\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amountOut\",\"type\":\"uint256\"},{\"internalType\":\"uint160[]\",\"name\":\"sqrtPriceX96AfterList\",\"type\":\"uint160[]\"},{\"internalType\":\"uint32[]\",\"name\":\"initializedTicksCrossedList\",\"type\":\"uint32[]\"},{\"internalType\":\"uint256\",\"name\":\"gasEstimate\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"tokenIn\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenOut\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amountIn\",\"type\":\"uint256\"},{\"internalType\":\"uint24\",\"name\":\"fee\",\"type\":\"uint24\"},{\"internalType\":\"uint160\",\"name\":\"sqrtPriceLimitX96\",\"type\":\"uint160\"}],\"internalType\":\"struct IQuoterV2.QuoteExactInputSingleParams\",\"name\":\"params\",\"type\":\"tuple\"}],\"name\":\"quoteExactInputSingle\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"amountOut\",\"type\":\"uint256\"},{\"internalType\":\"uint160\",\"name\":\"sqrtPriceX96After\",\"type\":\"uint160\"},{\"internalType\":\"uint32\",\"name\":\"initializedTicksCrossed\",\"type\":\"uint32\"},{\"internalType\":\"uint256\",\"name\":\"gasEstimate\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"Contract/Oracle.sol\":\"IQuoterV2\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"Contract/Oracle.sol\":{\"keccak256\":\"0xda8fb9c871f8ebeb1196e52fb61e333af6b2d1dc2f7f464cad53613990abed38\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://dd8fbacbdf4b956dc1acc8dde0e14fa86ec1f8d2414d2d3333b89081a91d7801\",\"dweb:/ipfs/QmYXaJ4Vsa9xmGVuXAqVQ8yZ8CszEz7d8Mg9tPLJzFQenT\"]}},\"version\":1}",
+	"abi": [
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "path",
+					"type": "bytes"
+				},
+				{
+					"internalType": "uint256",
+					"name": "amountIn",
+					"type": "uint256"
+				}
+			],
+			"name": "quoteExactInput",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "amountOut",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint160[]",
+					"name": "sqrtPriceX96AfterList",
+					"type": "uint160[]"
+				},
+				{
+					"internalType": "uint32[]",
+					"name": "initializedTicksCrossedList",
+					"type": "uint32[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "gasEstimate",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "tokenIn",
+							"type": "address"
+						},
+						{
+							"internalType": "address",
+							"name": "tokenOut",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "amountIn",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint24",
+							"name": "fee",
+							"type": "uint24"
+						},
+						{
+							"internalType": "uint160",
+							"name": "sqrtPriceLimitX96",
+							"type": "uint160"
+						}
+					],
+					"internalType": "struct IQuoterV2.QuoteExactInputSingleParams",
+					"name": "params",
+					"type": "tuple"
+				}
+			],
+			"name": "quoteExactInputSingle",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "amountOut",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint160",
+					"name": "sqrtPriceX96After",
+					"type": "uint160"
+				},
+				{
+					"internalType": "uint32",
+					"name": "initializedTicksCrossed",
+					"type": "uint32"
+				},
+				{
+					"internalType": "uint256",
+					"name": "gasEstimate",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"storageLayout": {
+		"storage": [],
+		"types": null
+	},
+	"functionHashes": {
+		"cdca1753": "quoteExactInput(bytes,uint256)",
+		"c6a5026a": "quoteExactInputSingle((address,address,uint256,uint24,uint160))"
+	},
+	"gasEstimates": {},
+	"devdoc": {
+		"kind": "dev",
+		"methods": {},
+		"version": 1
+	},
+	"userdoc": {
+		"kind": "user",
+		"methods": {},
+		"version": 1
+	},
+	"Assembly": "\n"
+}
