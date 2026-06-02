@@ -1,0 +1,30 @@
+## Production Architecture Sync (Polygon PoS Mainnet)   
+
+The core sovereign governance contract for the BFT ecosystem has been successfully deployed and verified on-chain. This structural deployment bridges our custom Governance NFT mechanics directly into a secure OpenZeppelin Governor modular ecosystem.
+
+### Deployed System Contracts
+- **Sovereign Governor Contract:** `0x4E5029e059eAF968EBF270e5CC18676DefDf4D25`
+- **DAO Timelock Controller:** `0xBbe836B8D8b8aA742989Ff9E4EFbEcE211681877`
+- **Ecosystem Registry:** `0x5D2Fedd2d899386C13Db9dF714A30f4C0b608284`
+- **Governance NFT (Voting Asset):** `0x7304c84E0A4029A8E80C5EA051182925e3e6fA2A`
+
+### Verified Deployment Log
+- **Transaction Hash Receipt:** `0x80fb5275e836041971a58d6d305a0434039eca50ed80880887dca944351e2e6e`
+- **Solidity Version:** `v0.8.31` (Optimized with 200 runs / Cancun EVM configuration)
+
+---
+
+### Access Control & Security Matrix
+
+To prevent attack vectors and central points of failure, administrative privileges have been strictly partitioned between community voting engines, automated delays, and core developers:
+
+1. **Supreme Admin Authority (`DEFAULT_ADMIN_ROLE`)**
+   - **Assigned Entity:** Gnosis Safe Vault (`0x5F0Abd8D46b94F1734fCB9eCdE6f1006d0ffc549`)
+   - **Permissions:** Full control over role allocation, permission revocation, and registry anchoring upgrades.
+
+2. **Technical Architecture & Upkeep (`MAINTAINER_ROLE` & `WEBMASTER_ROLE`)**
+   - **Assigned Entity:** Dev Wallet Pipeline (`0x1751a557Cdc4D116107fe2f5741F3686b03ddE3b`)
+   - **Permissions:** Front-end configuration mapping, system configuration updates, and full-stack web integration support.
+
+3. **Voting Mechanics Bridge**
+   - Instead of standard ERC-20 validations, the Governor uses a custom `IBigfootNFTVotes` loop. It queries the `getPastVotes` function inside the custom NFT asset directly. This tracks real community power linearly without requiring manual delegation.
