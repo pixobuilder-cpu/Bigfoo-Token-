@@ -1,4 +1,4 @@
-# **Bigfoot R&D Lab: Technical Ecosystem Report**
+# **Bigfoot R&D Lab: Technical Ecosystem Report**Official ENS Identity: bigfoot-lab.eth Registration Hash: 0x66019debd0758a33eaaf2d4428e1ba60c4e9c8c7da431f15cdd6e6b22853cb37
 
 This document serves as the comprehensive technical overview for the **Bigfoot Token (BFT)** ecosystem, designed for publication on **GitHub** to ensure transparency for the public and analytical tools like **Blockaid**.
 
